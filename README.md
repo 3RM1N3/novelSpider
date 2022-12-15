@@ -35,7 +35,7 @@ func main() {
 	bookName := args[1] // 书名
 	chapterIndex, err := strconv.Atoi(args[2])
 	if err != nil || chapterIndex < 0 {
-		log.Println("起始章节不能为复数")
+		log.Println("起始章节不能为负数")
 		return
 	}
 	url := args[3]
