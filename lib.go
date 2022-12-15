@@ -46,6 +46,7 @@ func NewNovelSpider(bookName, url, destPath, cachePath string,
 	}
 }
 
+// 开始爬取内容
 func (ns *NovelSpider) Run() error {
 	// 生成所需文件夹
 	os.MkdirAll(ns.CachePath, 0755)
@@ -68,6 +69,7 @@ func (ns *NovelSpider) Run() error {
 	return nil
 }
 
+// 递归逐章爬取
 func (ns *NovelSpider) spide(url string) error {
 	dom, err := ns.cacheOrRequest(url, path.Base(url))
 	if err != nil {
@@ -152,6 +154,7 @@ func (ns *NovelSpider) getCache(filePath string) *os.File {
 	return f
 }
 
+// 使用自定义headers发送请求
 func (ns *NovelSpider) requestWithCostumHeaders(url string, headers map[string]string) (*http.Response, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
