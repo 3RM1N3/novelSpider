@@ -25,14 +25,20 @@ type NovelSpider struct {
 	Headers             map[string]string                           // 自定义请求头
 	destFile            *os.File                                    // 待写入的目标文件
 	siteDomain          string                                      // 网站域名
-	requestWaitTime     time.Duration
+	requestWaitTime     time.Duration                               // 两次请求间隔
+	HTTPS               bool                                        // 网站是否为https
 }
 
 func NewNovelSpider(bookName, url, destPath, cachePath string,
 	currentChapterIndex, requestWaitSec int,
 ) NovelSpider {
+	https := true
+	if strings.HasPrefix(url, "http://") {
+		url = url[7:]
+		https = false
+	}
 	url = strings.TrimPrefix(url, "https://")
-	url = strings.TrimPrefix(url, "http://")
+
 	siteDomain, _, _ := strings.Cut(url, "/")
 
 	return NovelSpider{
@@ -43,6 +49,7 @@ func NewNovelSpider(bookName, url, destPath, cachePath string,
 		CurrentChapterIndex: currentChapterIndex,
 		siteDomain:          siteDomain,
 		requestWaitTime:     time.Duration(requestWaitSec) * time.Second,
+		HTTPS:               https,
 	}
 }
 
@@ -106,8 +113,12 @@ func (ns *NovelSpider) spide(url string) error {
 func (ns *NovelSpider) cacheOrRequest(url, fileName string) (*goquery.Document, error) {
 	filePath := path.Join(ns.CachePath, fileName)
 
-	if !strings.HasPrefix(url, "https://") {
-		url = "https://" + url
+	if !strings.HasPrefix(url, "http") {
+		if ns.HTTPS {
+			url = "https://" + url
+		} else {
+			url = "http://" + url
+		}
 	}
 
 	// 查询缓存
